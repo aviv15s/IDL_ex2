@@ -116,6 +116,8 @@ def run_q1():
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     model_train(model, train_dataloader, optimizer, criterion)
     model_test(model, test_dataloader)
+    torch.save(model.state_dict(), 'q1_model.pth')
+
 
 
 if __name__ == "__main__":
