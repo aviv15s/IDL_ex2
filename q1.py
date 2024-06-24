@@ -36,10 +36,6 @@ class Decoder(nn.Module):
         self.conv3 = nn.ConvTranspose2d(8, 4, 3)  # [batch, 4, 12, 12]
         self.conv4 = nn.ConvTranspose2d(4, 1, 5, stride=2, output_padding=1)  # [batch, 1, 28, 28]
 
-        # self.fc = nn.Linear(12, 32 * 2 * 2)  # Increase dimensions from 12 to 128
-        # self.conv1 = nn.ConvTranspose2d(32, 16, 3)  # [batch, 16, 4, 4]
-        # self.conv2 = nn.ConvTranspose2d(16, 8, 5, stride=2, output_padding=1)  # [batch, 8, 10, 10]
-        # self.conv3 = nn.ConvTranspose2d(8, 1, 5, stride=2, output_padding=1)  # [batch, 1, 28, 28]
 
     def forward(self, x):
         x = self.fc(x)
