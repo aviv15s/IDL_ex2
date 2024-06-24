@@ -8,18 +8,14 @@ import matplotlib.pyplot as plt
 class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
-        # self.conv1 = nn.Conv2d(1, 4, 5, stride=2)  # [batch, 8, 12, 12]
-        # self.conv2 = nn.Conv2d(4, 8, 3)  # [batch, 8, 10, 10]
-        # self.conv3 = nn.Conv2d(8, 16, 3, stride=2)  # [batch, 16, 8, 8]
-        # self.conv4 = nn.Conv2d(16, 32, 3)  # [batch, 16, 8, 8]
-        # # self.conv5 = nn.Conv2d(32, 32, 3)  # [batch, 32, 2, 2]
-        # self.fc = nn.Linear(32*4, 12)  # Reduce to 12 dimensions
-
-        self.conv1 = nn.Conv2d(1, 4, 5)  # [batch, 8, 24, 24]
-        self.conv2 = nn.Conv2d(4, 8, 3, stride=2)  # [batch, 8, 11, 11]
-        self.conv3 = nn.Conv2d(8, 16, 2, stride=2)  # [batch, 16, 10, 10]
-        self.conv4 = nn.Conv2d(16, 32, 3, stride=2)  # [batch, 16, 8, 8]
+        self.conv1 = nn.Conv2d(1, 4, 5, stride=2)  # [batch, 8, 12, 12]
+        self.conv2 = nn.Conv2d(4, 8, 3)  # [batch, 8, 10, 10]
+        self.conv3 = nn.Conv2d(8, 16, 3, stride=2)  # [batch, 16, 8, 8]
+        self.conv4 = nn.Conv2d(16, 32, 3)  # [batch, 16, 8, 8]
+        # self.conv5 = nn.Conv2d(32, 32, 3)  # [batch, 32, 2, 2]
         self.fc = nn.Linear(32*4, 12)  # Reduce to 12 dimensions
+
+
 
 
     def forward(self, x):
