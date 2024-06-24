@@ -16,12 +16,12 @@ class Classifier(q1.Encoder):
             nn.ReLU(),
             nn.Conv2d(16, 32, 3),
             nn.ReLU(),
+            nn.Flatten(),
             nn.Linear(32 * 4, 64),
             nn.ReLU(),
             nn.Linear(64, 20),
             nn.ReLU(),
             nn.Linear(20,10),
-            nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -34,11 +34,12 @@ def model_train(model, dataloader, optimizer, criterion):
     epoch_num = 10
     for epoch in range(epoch_num):
         for data in dataloader:
-            img, _ = data
+            img, label = data
+            label = torch.nn.functional.one_hot(label.to(torch.int64), 10)
 
             # Forward pass
             output = model(img)
-            loss = criterion(output, img)
+            loss = criterion(output.to(torch.float64), label.to(torch.float64))
 
             # Backward pass
             optimizer.zero_grad()
@@ -52,22 +53,15 @@ def model_test(model, dataloader):
     model.eval()
     with torch.no_grad():
         for data in dataloader:
-            img, _ = data
-            output = model(img)
+            img, label = data
+            predictions = torch.argmax(model(img), 1)
 
             # Plot original images
             plt.figure(figsize=(12, 4))
             for i in range(6):
                 plt.subplot(2, 6, i + 1)
                 plt.imshow(img[i][0].cpu().numpy(), cmap='gray')
-                plt.title('Original')
-                plt.axis('off')
-
-            # Plot reconstructed images
-            for i in range(6):
-                plt.subplot(2, 6, i + 7)
-                plt.imshow(output[i][0].cpu().numpy(), cmap='gray')
-                plt.title('Reconstructed')
+                plt.title(f'Prediction: {predictions[i]}')
                 plt.axis('off')
 
             plt.show()
@@ -78,10 +72,12 @@ def model_test(model, dataloader):
 def run_q2():
     train_dataloader, test_dataloader = dl.get_dataloaders()
     model = Classifier()
-    criterion = nn.L1Loss()
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     model_train(model, train_dataloader, optimizer, criterion)
     model_test(model, test_dataloader)
+    torch.save(model.state_dict(), 'q2_model.pth')
+
 
 
 if __name__ == "__main__":

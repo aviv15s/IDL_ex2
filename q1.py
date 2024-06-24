@@ -7,11 +7,10 @@ import matplotlib.pyplot as plt
 class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
-        self.conv1 = nn.Conv2d(1, 4, 5, stride=2)  # [batch, 8, 12, 12]
+        self.conv1 = nn.Conv2d(1, 4, 5, stride=2)  # [batch, 4, 12, 12]
         self.conv2 = nn.Conv2d(4, 8, 3)  # [batch, 8, 10, 10]
-        self.conv3 = nn.Conv2d(8, 16, 3, stride=2)  # [batch, 16, 8, 8]
-        self.conv4 = nn.Conv2d(16, 32, 3)  # [batch, 16, 8, 8]
-        # self.conv5 = nn.Conv2d(32, 32, 3)  # [batch, 32, 2, 2]
+        self.conv3 = nn.Conv2d(8, 16, 3, stride=2)  # [batch, 16, 4, 4]
+        self.conv4 = nn.Conv2d(16, 32, 3)  # [batch, 32, 2, 2]
         self.fc = nn.Linear(32*4, 12)  # Reduce to 12 dimensions
 
 
@@ -65,7 +64,7 @@ class AutoEncoder(nn.Module):
 
 def model_train(model, dataloader, optimizer, criterion):
     model.train()
-    epoch_num = 10
+    epoch_num = 30
     for epoch in range(epoch_num):
         for data in dataloader:
             img, _ = data
