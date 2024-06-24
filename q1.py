@@ -11,7 +11,7 @@ class Encoder(nn.Module):
         self.conv1 = nn.Conv2d(1, 8, 5, stride=2)  # [batch, 8, 12, 12]
         self.conv2 = nn.Conv2d(8, 16, 5, stride=2)  # [batch, 16, 4, 4]
         self.conv3 = nn.Conv2d(16, 32, 3)  # [batch, 32, 2, 2]
-        self.fc = nn.Linear(32, 12)  # Reduce to 12 dimensions
+        self.fc = nn.Linear(32*4, 12)  # Reduce to 12 dimensions
 
     def forward(self, x):
         x = torch.relu(self.conv1(x))
@@ -32,7 +32,7 @@ class Decoder(nn.Module):
 
     def forward(self, x):
         x = self.fc(x)
-        x = x.view(x.size(0), 32, 1, 1)  # Reshape to [batch, 32, 1, 1]
+        x = x.view(x.size(0), 32, 2, 2)  # Reshape to [batch, 32, 1, 1]
         x = torch.relu(self.conv1(x))
         x = torch.relu(self.conv2(x))
         x = torch.tanh(self.conv3(x))  # Output normalized to [-1, 1]
@@ -73,7 +73,7 @@ def train_model(model, dataloader, optimizer, criterion):
         print(f'Epoch [{epoch + 1}/{epoch_num}], Loss: {loss.item():.4f}')
 
 
-def test_model(model, dataloader):
+def eval_model(model, dataloader):
     model.eval()
     with torch.no_grad():
         for data in dataloader:
@@ -106,7 +106,7 @@ def run_q1():
     optimizer = optim.SGD(model.parameters(), lr=0.001)
 
     train_model(model, train_dataloader, optimizer, criterion)
-    test_model(model, test_dataloader)
+    eval_model(model, test_dataloader)
 
 
 if __name__ == "__main__":
