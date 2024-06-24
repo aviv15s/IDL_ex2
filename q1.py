@@ -54,7 +54,7 @@ class AutoEncoder(nn.Module):
 
 
 
-def train_model(model, dataloader, optimizer, criterion):
+def model_train(model, dataloader, optimizer, criterion):
     model.train()
     epoch_num = 10
     for epoch in range(epoch_num):
@@ -73,7 +73,7 @@ def train_model(model, dataloader, optimizer, criterion):
         print(f'Epoch [{epoch + 1}/{epoch_num}], Loss: {loss.item():.4f}')
 
 
-def test_model(model, dataloader):
+def model_test(model, dataloader):
     model.eval()
     with torch.no_grad():
         for data in dataloader:
@@ -105,8 +105,8 @@ def run_q1():
     criterion = nn.L1Loss()
     optimizer = optim.SGD(model.parameters(), lr=0.001)
 
-    train_model(model, train_dataloader, optimizer, criterion)
-    test_model(model, test_dataloader)
+    model_train(model, train_dataloader, optimizer, criterion)
+    model_test(model, test_dataloader)
 
 
 if __name__ == "__main__":
