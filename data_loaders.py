@@ -3,20 +3,26 @@ from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
 import torch
 import matplotlib.pyplot as plt
+from torchvision import datasets, transforms
 
 def get_dataloaders():
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,))
+    ])
+
     training_data = datasets.MNIST(
         root="data",
         train=True,
         download=True,
-        transform=ToTensor()
+        transform=transform
     )
 
     test_data = datasets.MNIST(
         root="data",
         train=False,
         download=True,
-        transform=ToTensor()
+        transform=transform
     )
 
     train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
