@@ -1,6 +1,5 @@
 import data_loaders as dl
 import torch.nn as nn
-import torch.nn.functional as F
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
