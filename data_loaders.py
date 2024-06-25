@@ -1,11 +1,11 @@
 from torchvision import datasets
 from torchvision.transforms import ToTensor
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 import torch
 import matplotlib.pyplot as plt
 from torchvision import datasets, transforms
 
-def get_dataloaders():
+def get_dataloaders(train_size=None):
     transform = transforms.Compose([
         transforms.ToTensor(),
         # transforms.Normalize((0.5,), (0.5,))
@@ -24,6 +24,10 @@ def get_dataloaders():
         download=True,
         transform=transform
     )
+
+    if train_size is not None:
+        indices = torch.arange(100)
+        training_data = Subset(training_data, indices)
 
     train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
     test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True)
