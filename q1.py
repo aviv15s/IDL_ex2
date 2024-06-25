@@ -23,6 +23,7 @@ def model_train(model, dataloader, optimizer, criterion):
             optimizer.step()
         best_loss = min(best_loss, loss.item())
         print(f'Epoch [{epoch + 1}/{epoch_num}], Loss: {loss.item():.4f}')
+    return best_loss
 
 
 def model_test(model, dataloader):

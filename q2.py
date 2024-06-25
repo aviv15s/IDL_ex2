@@ -7,19 +7,7 @@ import matplotlib.pyplot as plt
 import networks
 
 
-class Classifier(networks.Encoder):
-    def __init__(self):
-        super(Classifier, self).__init__(64)
-        self.fc_layers = nn.Sequential(
-            nn.Linear(64, 20),
-            nn.ReLU(),
-            nn.Linear(20, 10),
-        )
 
-    def forward(self, x):
-        x = networks.Encoder.forward(self, x)
-        x = self.fc_layers(x)
-        return x
 
 
 def model_train(model, dataloader, optimizer, criterion):
@@ -65,7 +53,7 @@ def model_test(model, dataloader):
 
 def run_q2():
     train_dataloader, test_dataloader = dl.get_dataloaders()
-    model = Classifier()
+    model = networks.Classifier(10)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     train_loss = model_train(model, train_dataloader, optimizer, criterion)

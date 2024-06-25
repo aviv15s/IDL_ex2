@@ -56,3 +56,18 @@ class AutoEncoder(nn.Module):
         x = self.encoder(x)
         x = self.decoder(x)
         return x
+
+
+class Classifier(Encoder):
+    def __init__(self, d):
+        super(Classifier, self).__init__(64)
+        self.fc_layers = nn.Sequential(
+            nn.Linear(64, 20),
+            nn.ReLU(),
+            nn.Linear(20, d),
+        )
+
+    def forward(self, x):
+        x = Encoder.forward(self, x)
+        x = self.fc_layers(x)
+        return x
