@@ -4,32 +4,26 @@ import torch
 import data_loaders as dl
 import torch.optim as optim
 import matplotlib.pyplot as plt
-class Classifier(q1.Encoder):
+import networks
+
+
+class Classifier(networks.Encoder):
     def __init__(self):
-        super(Classifier, self).__init__()
-        self.layers = nn.Sequential(
-            nn.Conv2d(1, 4, 5, stride=2),
-            nn.ReLU(),
-            nn.Conv2d(4, 8, 3),
-            nn.ReLU(),
-            nn.Conv2d(8, 16, 3, stride=2),
-            nn.ReLU(),
-            nn.Conv2d(16, 32, 3),
-            nn.ReLU(),
-            nn.Flatten(),
-            nn.Linear(32 * 4, 64),
-            nn.ReLU(),
+        super(Classifier, self).__init__(64)
+        self.fc_layers = nn.Sequential(
             nn.Linear(64, 20),
             nn.ReLU(),
-            nn.Linear(20,10),
+            nn.Linear(20, 10),
         )
 
     def forward(self, x):
-        x = self.layers(x)
+        x = networks.Encoder.forward(self, x)
+        x = self.fc_layers(x)
         return x
 
 
 def model_train(model, dataloader, optimizer, criterion):
+    best_loss = 10000
     model.train()
     epoch_num = 10
     for epoch in range(epoch_num):
@@ -45,8 +39,9 @@ def model_train(model, dataloader, optimizer, criterion):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            best_loss = min(best_loss, loss.item())
         print(f'Epoch [{epoch + 1}/{epoch_num}], Loss: {loss.item():.4f}')
+    return best_loss
 
 
 def model_test(model, dataloader):
@@ -68,18 +63,15 @@ def model_test(model, dataloader):
             break
 
 
-
 def run_q2():
     train_dataloader, test_dataloader = dl.get_dataloaders()
     model = Classifier()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    model_train(model, train_dataloader, optimizer, criterion)
+    train_loss = model_train(model, train_dataloader, optimizer, criterion)
     model_test(model, test_dataloader)
-    torch.save(model.state_dict(), 'q2_model.pth')
-
+    torch.save(model.state_dict(), f'q2_model_{round(train_loss, 2)}.pth')
 
 
 if __name__ == "__main__":
     run_q2()
-
