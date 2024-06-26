@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-
+LATENT_VECTOR_SIZE = 12
 
 
 class Encoder(nn.Module):
@@ -8,13 +8,13 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
 
         self.layers = nn.Sequential(
-            nn.Conv2d(1, 4, 5, stride=2),  # [batch, 4, 12, 12]
+            nn.Conv2d(1, 4, 5, stride=2),  # [batch, C=4, W=12, H=12]
             nn.ReLU(),
-            nn.Conv2d(4, 8, 3),  # [batch, 8, 10, 10]
+            nn.Conv2d(4, 8, 3),  # [batch, C=8, W=10, H=10]
             nn.ReLU(),
-            nn.Conv2d(8, 16, 3, stride=2),  # [batch, 16, 4, 4]
+            nn.Conv2d(8, 16, 3, stride=2),  # [batch, C=16, W=4, H=4]
             nn.ReLU(),
-            nn.Conv2d(16, 32, 3),  # [batch, 32, 2, 2]
+            nn.Conv2d(16, 32, 3),  # [batch, C=32, W=2, H=2]
             nn.ReLU(),
             nn.Flatten(),
             nn.Linear(32 * 4, d),
@@ -30,19 +30,20 @@ class Decoder(nn.Module):
     def __init__(self, d):
         super(Decoder, self).__init__()
         self.fc = nn.Linear(d, 32 * 2 * 2)  # Increase dimensions from 12 to 128
-        self.conv1 = nn.ConvTranspose2d(32, 16, 3)  # [batch, 16, 4, 4]
-        self.conv2 = nn.ConvTranspose2d(16, 8, 3, stride=2, output_padding=1)  # [batch, 8, 10, 10]
-        self.conv3 = nn.ConvTranspose2d(8, 4, 3)  # [batch, 4, 12, 12]
-        self.conv4 = nn.ConvTranspose2d(4, 1, 5, stride=2, output_padding=1)  # [batch, 1, 28, 28]
+        self.conv1 = nn.ConvTranspose2d(32, 32, 3)  # [batch, C=32, W=4, H=4]
+        self.conv2 = nn.ConvTranspose2d(32, 16, 3, stride=2, output_padding=1)  # [batch, C=16, W=10, H=10]
+        self.conv3 = nn.ConvTranspose2d(16, 8, 3,  stride=2, output_padding=1)  # [batch, C=8, W=22, H=22]
+        self.conv4 = nn.ConvTranspose2d(8, 4, 3)  # [batch, C=4, W=24, H=24]
+        self.conv5 = nn.ConvTranspose2d(4, 1, 5)  # [batch, C=1, W=28, H=28]
 
     def forward(self, x):
         x = self.fc(x)
         x = x.view(x.size(0), 32, 2, 2)  # Reshape to [batch, 32, 2, 2]
         x = torch.relu(self.conv1(x))
         x = torch.relu(self.conv2(x))
-        # x = torch.sigmoid(self.conv3(x))
         x = torch.relu(self.conv3(x))
-        x = self.conv4(x)  # Output normalized to [0, 1]
+        x = torch.relu(self.conv4(x))  # Output normalized to [0, 1]
+        x = self.conv5(x)
         return x
 
 
@@ -58,16 +59,17 @@ class AutoEncoder(nn.Module):
         return x
 
 
-class Classifier(Encoder):
-    def __init__(self, d):
-        super(Classifier, self).__init__(64)
-        self.fc_layers = nn.Sequential(
-            nn.Linear(64, 20),
+class Classifier(nn.Module):
+    def __init__(self,  final_d):
+        super(Classifier, self).__init__()
+        self.encoder = Encoder(LATENT_VECTOR_SIZE)
+        self.mlp =  nn.Sequential(
+            nn.Linear(LATENT_VECTOR_SIZE, 20),
             nn.ReLU(),
-            nn.Linear(20, d),
+            nn.Linear(20, final_d),
         )
 
     def forward(self, x):
-        x = Encoder.forward(self, x)
-        x = self.fc_layers(x)
+        x = self.encoder(x)
+        x = self.mlp(x)
         return x
