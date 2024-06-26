@@ -11,8 +11,9 @@ class Encoder(nn.Module):
         self.conv2 = nn.Conv2d(4, 8, 3)  # [batch, 8, 10, 10]
         self.conv3 = nn.Conv2d(8, 16, 3, stride=2)  # [batch, 16, 8, 8]
         self.conv4 = nn.Conv2d(16, 32, 3)  # [batch, 16, 8, 8]
-        # self.conv5 = nn.Conv2d(32, 32, 3)  # [batch, 32, 2, 2]
         self.fc = nn.Linear(32*4, 12)  # Reduce to 12 dimensions
+
+
 
 
 
@@ -27,24 +28,48 @@ class Encoder(nn.Module):
         return x
 
 
+
+
 class Decoder(nn.Module):
     def __init__(self):
         super(Decoder, self).__init__()
+        # self.fc = nn.Linear(12, 32 * 2 * 2)  # Increase dimensions from 12 to 128
+        # self.conv1 = nn.ConvTranspose2d(32, 16, 3)  # [batch, 16, 4, 4]
+        # self.conv2 = nn.ConvTranspose2d(16, 8, 3, stride=2, output_padding=1)  # [batch, 8, 10, 10]
+        # self.conv3 = nn.ConvTranspose2d(8, 4, 3)  # [batch, 4, 12, 12]
+        # self.conv4 = nn.ConvTranspose2d(4, 1, 5, stride=2, output_padding=1)  # [batch, 1, 28, 28]
+
         self.fc = nn.Linear(12, 32 * 2 * 2)  # Increase dimensions from 12 to 128
-        self.conv1 = nn.ConvTranspose2d(32, 16, 3)  # [batch, 16, 4, 4]
-        self.conv2 = nn.ConvTranspose2d(16, 8, 3, stride=2, output_padding=1)  # [batch, 8, 10, 10]
-        self.conv3 = nn.ConvTranspose2d(8, 4, 3)  # [batch, 4, 12, 12]
-        self.conv4 = nn.ConvTranspose2d(4, 1, 5, stride=2, output_padding=1)  # [batch, 1, 28, 28]
+        self.conv1 = nn.ConvTranspose2d(32, 32, 3)  # [batch, 16, 4, 4]
+        self.conv2 = nn.ConvTranspose2d(32, 16, 3, stride=2, output_padding=1)  # [batch, 8, 10, 10]
+        self.conv3 = nn.ConvTranspose2d(16, 8, 3,  stride=2, output_padding=1)  # [batch, 4, 12, 12]
+        self.conv4 = nn.ConvTranspose2d(8, 4, 3)  # [batch, 1, 28, 28]
+        self.conv5 = nn.ConvTranspose2d(4, 1, 5)
+        # self.conv1 = nn.Conv2d(1, 4, 5)  # [batch, 8, 24, 24]
+        # self.conv2 = nn.Conv2d(4, 8, 3)  # [batch, 8, 22, 22]
+        # self.conv3 = nn.Conv2d(8, 16, 3, stride=2)  # [batch, 16, 10, 10]
+        # self.conv4 = nn.Conv2d(16, 32, 3, stride=2)  # [batch, 16, 4, 4]
+        # self.conv5 = nn.Conv2d(32, 32, 3)
+        # self.fc = nn.Linear(32*4, 12)  # Reduce to 12 dimensions
 
 
     def forward(self, x):
+        # x = self.fc(x)
+        # x = x.view(x.size(0), 32, 2, 2)  # Reshape to [batch, 32, 2, 2]
+        # x = torch.relu(self.conv1(x))
+        # x = torch.relu(self.conv2(x))
+        # # x = torch.sigmoid(self.conv3(x))
+        # x = torch.relu(self.conv3(x))
+        # x = self.conv4(x)  # Output normalized to [0, 1]
+        # return x
         x = self.fc(x)
         x = x.view(x.size(0), 32, 2, 2)  # Reshape to [batch, 32, 2, 2]
         x = torch.relu(self.conv1(x))
         x = torch.relu(self.conv2(x))
         # x = torch.sigmoid(self.conv3(x))
         x = torch.relu(self.conv3(x))
-        x = self.conv4(x)  # Output normalized to [0, 1]
+        x = torch.relu(self.conv4(x))  # Output normalized to [0, 1]
+        x = self.conv5(x)
         return x
 
 
@@ -65,7 +90,7 @@ class AutoEncoder(nn.Module):
 
 def model_train(model, dataloader, optimizer, criterion):
     model.train()
-    epoch_num = 10
+    epoch_num = 30
     for epoch in range(epoch_num):
         for data in dataloader:
             img, _ = data
