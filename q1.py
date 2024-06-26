@@ -3,92 +3,10 @@ import torch.nn as nn
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
-
-class Encoder(nn.Module):
-    def __init__(self):
-        super(Encoder, self).__init__()
-        self.conv1 = nn.Conv2d(1, 4, 5, stride=2)  # [batch, 8, 12, 12]
-        self.conv2 = nn.Conv2d(4, 8, 3)  # [batch, 8, 10, 10]
-        self.conv3 = nn.Conv2d(8, 16, 3, stride=2)  # [batch, 16, 8, 8]
-        self.conv4 = nn.Conv2d(16, 32, 3)  # [batch, 16, 8, 8]
-        self.fc = nn.Linear(32*4, 12)  # Reduce to 12 dimensions
-
-
-
-
-
-
-    def forward(self, x):
-        x = torch.relu(self.conv1(x))
-        x = torch.relu(self.conv2(x))
-        x = torch.relu(self.conv3(x))
-        x = torch.relu(self.conv4(x))
-        x = x.view(x.size(0), -1)  # Flatten
-        x = torch.relu(self.fc(x))
-        return x
-
-
-
-
-class Decoder(nn.Module):
-    def __init__(self):
-        super(Decoder, self).__init__()
-        # self.fc = nn.Linear(12, 32 * 2 * 2)  # Increase dimensions from 12 to 128
-        # self.conv1 = nn.ConvTranspose2d(32, 16, 3)  # [batch, 16, 4, 4]
-        # self.conv2 = nn.ConvTranspose2d(16, 8, 3, stride=2, output_padding=1)  # [batch, 8, 10, 10]
-        # self.conv3 = nn.ConvTranspose2d(8, 4, 3)  # [batch, 4, 12, 12]
-        # self.conv4 = nn.ConvTranspose2d(4, 1, 5, stride=2, output_padding=1)  # [batch, 1, 28, 28]
-
-        self.fc = nn.Linear(12, 32 * 2 * 2)  # Increase dimensions from 12 to 128
-        self.conv1 = nn.ConvTranspose2d(32, 32, 3)  # [batch, 16, 4, 4]
-        self.conv2 = nn.ConvTranspose2d(32, 16, 3, stride=2, output_padding=1)  # [batch, 8, 10, 10]
-        self.conv3 = nn.ConvTranspose2d(16, 8, 3,  stride=2, output_padding=1)  # [batch, 4, 12, 12]
-        self.conv4 = nn.ConvTranspose2d(8, 4, 3)  # [batch, 1, 28, 28]
-        self.conv5 = nn.ConvTranspose2d(4, 1, 5)
-        # self.conv1 = nn.Conv2d(1, 4, 5)  # [batch, 8, 24, 24]
-        # self.conv2 = nn.Conv2d(4, 8, 3)  # [batch, 8, 22, 22]
-        # self.conv3 = nn.Conv2d(8, 16, 3, stride=2)  # [batch, 16, 10, 10]
-        # self.conv4 = nn.Conv2d(16, 32, 3, stride=2)  # [batch, 16, 4, 4]
-        # self.conv5 = nn.Conv2d(32, 32, 3)
-        # self.fc = nn.Linear(32*4, 12)  # Reduce to 12 dimensions
-
-
-    def forward(self, x):
-        # x = self.fc(x)
-        # x = x.view(x.size(0), 32, 2, 2)  # Reshape to [batch, 32, 2, 2]
-        # x = torch.relu(self.conv1(x))
-        # x = torch.relu(self.conv2(x))
-        # # x = torch.sigmoid(self.conv3(x))
-        # x = torch.relu(self.conv3(x))
-        # x = self.conv4(x)  # Output normalized to [0, 1]
-        # return x
-        x = self.fc(x)
-        x = x.view(x.size(0), 32, 2, 2)  # Reshape to [batch, 32, 2, 2]
-        x = torch.relu(self.conv1(x))
-        x = torch.relu(self.conv2(x))
-        # x = torch.sigmoid(self.conv3(x))
-        x = torch.relu(self.conv3(x))
-        x = torch.relu(self.conv4(x))  # Output normalized to [0, 1]
-        x = self.conv5(x)
-        return x
-
-
-class AutoEncoder(nn.Module):
-    def __init__(self):
-        super(AutoEncoder, self).__init__()
-        self.encoder = Encoder()
-        self.decoder = Decoder()
-
-    def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
-        return x
-
-
-
-
+import networks
 
 def model_train(model, dataloader, optimizer, criterion):
+    best_loss = 1000000
     model.train()
     epoch_num = 30
     for epoch in range(epoch_num):
@@ -103,8 +21,9 @@ def model_train(model, dataloader, optimizer, criterion):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+        best_loss = min(best_loss, loss.item())
         print(f'Epoch [{epoch + 1}/{epoch_num}], Loss: {loss.item():.4f}')
+    return best_loss
 
 
 def model_test(model, dataloader):
@@ -136,12 +55,12 @@ def model_test(model, dataloader):
 
 def run_q1():
     train_dataloader, test_dataloader = dl.get_dataloaders()
-    model = AutoEncoder()
+    model = networks.AutoEncoder(12)
     criterion = nn.L1Loss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    model_train(model, train_dataloader, optimizer, criterion)
+    train_loss = model_train(model, train_dataloader, optimizer, criterion)
     model_test(model, test_dataloader)
-    torch.save(model.state_dict(), 'q1_model.pth')
+    torch.save(model.state_dict(), f'q1_model_{round(train_loss,2)}.pth')
 
 
 
