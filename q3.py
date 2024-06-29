@@ -49,7 +49,7 @@ def plot_results(classifier_model, ae_model, dataloader):
 
     with torch.no_grad():
         counter = 1
-        for data in dataloader.dataset:  # TODO select single batch
+        for data in dataloader.dataset:
             counter += 1
             if counter > 50:
                 break
