@@ -1,6 +1,5 @@
 import torch.nn as nn
 import torch
-LATENT_VECTOR_SIZE = 12
 
 
 class Encoder(nn.Module):
@@ -62,9 +61,9 @@ class AutoEncoder(nn.Module):
 class Classifier(nn.Module):
     def __init__(self,  final_d):
         super(Classifier, self).__init__()
-        self.encoder = Encoder(LATENT_VECTOR_SIZE)
+        self.encoder = Encoder(12)
         self.mlp =  nn.Sequential(
-            nn.Linear(LATENT_VECTOR_SIZE, 20),
+            nn.Linear(12, 20),
             nn.ReLU(),
             nn.Linear(20, final_d),
         )

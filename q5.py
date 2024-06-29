@@ -1,13 +1,15 @@
 import torch.nn as nn
+import torch
 import torch.optim as optim
 import networks
-from utils import plot_graphs_train_test_values, model_train_labels, model_test_labels, get_dataloaders
-import torch
+from utils import get_dataloaders, plot_graphs_train_test_values, model_test_labels, model_train_labels
 
 
-def run_q4(epochs):
-    train_dataloader, test_dataloader = get_dataloaders(100)
+def run_q5(epochs):
     model = networks.Classifier(10)
+    model.encoder.load_state_dict(torch.load("q1_encoder.pth"))
+
+    train_dataloader, test_dataloader = get_dataloaders(100)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -24,12 +26,12 @@ def run_q4(epochs):
         print(f'Train loss: {train_loss}, Test loss: {test_loss}')
         print(f'Train Accuracy: {round(train_accuracy, 3)}%, Test Accuracy: {round(test_accuracy, 3)}%')
 
-    torch.save(model.state_dict(), f'q4_full_model.pth')
-    torch.save(model.encoder.state_dict(), f'q4_encoder_model.pth')
+    torch.save(model.state_dict(), f'q5_full_model.pth')
+    torch.save(model.encoder.state_dict(), f'q5_encoder_model.pth')
 
-    plot_graphs_train_test_values(train_loss_list, test_loss_list, "loss", "loss [arb]", 4)
-    plot_graphs_train_test_values(train_accuracy_list, test_accuracy_list, "accuracy", "%", 4)
+    plot_graphs_train_test_values(train_loss_list, test_loss_list, "loss", "loss [arb]", 5)
+    plot_graphs_train_test_values(train_accuracy_list, test_accuracy_list, " accuracy", "%", 5)
 
 
 if __name__ == "__main__":
-    run_q4(100)
+    run_q5(100)

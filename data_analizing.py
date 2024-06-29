@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-import data_loaders as dl
+import utils as dl
 import matplotlib.pyplot as plt
 
 
